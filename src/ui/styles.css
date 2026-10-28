@@ -1,0 +1,714 @@
+/**
+ * PharmaLink OS - Foundation Stylesheet
+ *
+ * FROZEN VISUAL DESIGN SYSTEM.
+ * Source of truth: /mnt/user-data/uploads/PharmaLink.html (primary -
+ * mobile-first shell: fixed header, gold logo, pill nav/filters,
+ * floating white cards, toast, install banner, Cairo font) and
+ * pharma_search.html (secondary - contributes the responsive 3-column
+ * card-body layout used at wider viewports).
+ *
+ * Every token and component class below is a direct port of a class
+ * that exists in one of those two files (see inline "Source:" notes).
+ * Names are generalized (e.g. .dc -> .entity-card) only so every
+ * future screen - not just search - can reuse the same primitives.
+ * No new visual language has been introduced. Do not restyle ad-hoc;
+ * update tokens here and every screen inherits the change.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+
+/* ---------------------------------------------------------------- */
+/* Design Tokens (Source: :root in both reference files)            */
+/* ---------------------------------------------------------------- */
+
+:root {
+  --navy: #0D1B4E;
+  --royal: #1A3B9E;
+  --gold: #FFD600;
+  --orange: #FF6D00;
+  --green: #00897B;   /* aka --emerald in pharma_search.html */
+  --red: #E53935;     /* aka --coral in pharma_search.html */
+  --purple: #6A1B9A;
+  --ink: #0D0D0D;
+  --mist: #F4F6FB;
+  --border: #DDE3F0;
+  --card: rgba(255, 255, 255, 0.97);   /* Source: --card */
+  --glass: rgba(255, 255, 255, 0.92);  /* Source: --glass (pharma_search.html) */
+
+  --font-family-base: 'Cairo', sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --header-height: 0px; /* set dynamically by nav.js pad(), matching reference's pad() */
+}
+
+/* ---------------------------------------------------------------- */
+/* Reset & Base (Source: * / html,body in PharmaLink.html)          */
+/* ---------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: var(--font-family-base);
+  background: var(--navy);
+  min-height: 100vh;
+  overscroll-behavior: none;
+  color: var(--ink);
+}
+
+h1, h2, h3, h4, p { margin: 0 0 var(--space-3) 0; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font-family: inherit; }
+
+/* ---------------------------------------------------------------- */
+/* App Shell / Header (Source: #hdr, .h-top, .logo-box, .logo-icon, */
+/* .logo-name, .btn-up in PharmaLink.html)                          */
+/* ---------------------------------------------------------------- */
+
+#hdr {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: linear-gradient(150deg, #0a1640, #1a3b9e);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.h-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+  gap: 8px;
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--gold);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(255, 214, 0, 0.4);
+}
+
+.logo-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+}
+
+.logo-name span {
+  display: block;
+  font-size: 0.58rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* Contextual header action button. Screens (Phase 2+) may render one
+   button here (e.g. WhatsApp screen's "upload files"). Same visual
+   treatment as .btn-up in the reference. */
+.btn-up {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 9px 15px;
+  border-radius: 11px;
+  font-family: var(--font-family-base);
+  font-weight: 900;
+  font-size: 0.83rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(255, 214, 0, 0.35);
+  transition: transform 0.1s;
+}
+.btn-up:active { transform: scale(0.94); }
+
+/* ---------------------------------------------------------------- */
+/* Stats Bar (Source: #stats, .sv in PharmaLink.html)               */
+/* ---------------------------------------------------------------- */
+
+.stats-strip {
+  display: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.stats-strip.on { display: flex; }
+
+.stat-v {
+  flex: 1;
+  text-align: center;
+  padding: 5px 2px;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+.stat-v:last-child { border: none; }
+.stat-v b { display: block; font-size: 0.95rem; font-weight: 900; color: var(--gold); line-height: 1.1; }
+.stat-v small { font-size: 0.53rem; color: rgba(255, 255, 255, 0.4); }
+
+/* Wider-viewport stat cards (Source: .stats-bar, .stat-card in pharma_search.html) */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: var(--space-4);
+}
+.stat-card {
+  background: var(--glass);
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: center;
+  border-top: 3px solid var(--gold);
+}
+.stat-card .stat-val { font-size: 1.6rem; font-weight: 900; color: var(--navy); line-height: 1; }
+.stat-card .stat-lbl { font-size: 0.75rem; color: #666; margin-top: 3px; }
+
+/* ---------------------------------------------------------------- */
+/* File Tags (Source: #ftags, .ft in PharmaLink.html)               */
+/* ---------------------------------------------------------------- */
+
+.file-tags {
+  display: none;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px 12px 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.file-tags.on { display: flex; }
+.file-tag {
+  background: rgba(0, 137, 123, 0.3);
+  color: #80CBC4;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ---------------------------------------------------------------- */
+/* Search Box (Source: .srch-wrap, .srch-box, .btn-go, #clearQ)     */
+/* ---------------------------------------------------------------- */
+
+.search-wrap {
+  padding: 8px 12px 2px;
+  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 13px;
+  padding: 3px 5px 3px 4px;
+}
+.search-box input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-family-base);
+  font-size: 0.97rem;
+  font-weight: 600;
+  color: var(--navy);
+  padding: 9px 6px;
+  outline: none;
+  text-align: right;
+  min-width: 0;
+}
+.search-box input::placeholder { color: #aaa; font-weight: 400; }
+.btn-go {
+  background: var(--orange);
+  border: none;
+  color: #fff;
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+}
+.btn-go:active { transform: scale(0.88); }
+.btn-clear { background: none; border: none; color: #bbb; font-size: 1.1rem; cursor: pointer; padding: 2px 4px; display: none; }
+.btn-clear.on { display: block; }
+
+/* ---------------------------------------------------------------- */
+/* Pills - shared by nav & filters (Source: .pills, .pill in         */
+/* PharmaLink.html; nav re-uses the same visual treatment)          */
+/* ---------------------------------------------------------------- */
+
+.pills {
+  display: flex;
+  gap: 6px;
+  padding: 7px 12px 9px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.pills::-webkit-scrollbar { display: none; }
+
+.pill {
+  flex-shrink: 0;
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.65);
+  font-family: var(--font-family-base);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s;
+  white-space: nowrap;
+  list-style: none;
+  display: inline-block;
+}
+.pill.on, .pill--active {
+  background: var(--gold);
+  color: var(--navy);
+  border-color: var(--gold);
+  font-weight: 900;
+}
+
+.nav-list { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; }
+.nav-item { flex-shrink: 0; }
+.nav-link { padding: 5px 13px; border-radius: 20px; }
+
+/* ---------------------------------------------------------------- */
+/* Content Area (Source: #body in PharmaLink.html)                  */
+/* ---------------------------------------------------------------- */
+
+#content-mount, .app-main {
+  min-height: 100vh;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
+  padding-left: 12px;
+  padding-right: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------- */
+/* Welcome / Empty / Dropzone (Source: .wlc, .drop, .btn-demo,      */
+/* .howto in PharmaLink.html)                                       */
+/* ---------------------------------------------------------------- */
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 44px 22px 36px;
+  gap: 16px;
+  text-align: center;
+}
+.welcome h2 { color: var(--gold); font-size: 1.45rem; font-weight: 900; }
+.welcome > p { color: rgba(255, 255, 255, 0.5); font-size: 0.82rem; line-height: 1.85; }
+
+.dropzone {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px dashed rgba(255, 214, 0, 0.4);
+  border-radius: 18px;
+  padding: 28px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.dropzone.drag { background: rgba(255, 214, 0, 0.1); border-color: var(--gold); }
+.dropzone .dz-icon { font-size: 2.6rem; margin-bottom: 6px; }
+.dropzone h3 { color: var(--gold); font-size: 0.97rem; font-weight: 900; margin-bottom: 4px; }
+.dropzone p { color: rgba(255, 255, 255, 0.4); font-size: 0.7rem; }
+
+.btn-outline {
+  background: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 10px 26px;
+  border-radius: 11px;
+  font-family: var(--font-family-base);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.btn-outline:active { background: rgba(255, 255, 255, 0.08); }
+
+.howto { background: rgba(0, 0, 0, 0.22); border-radius: 13px; padding: 14px 16px; width: 100%; text-align: right; }
+.howto h4 { color: var(--gold); font-size: 0.76rem; font-weight: 700; margin-bottom: 8px; }
+.howto li { color: rgba(255, 255, 255, 0.42); font-size: 0.69rem; line-height: 2; list-style: none; display: flex; gap: 7px; }
+
+/* ---------------------------------------------------------------- */
+/* Processing (Source: .proc, .spin, .pbar-wrap, .pbar)             */
+/* ---------------------------------------------------------------- */
+
+.processing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 90px 20px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.spinner {
+  width: 46px;
+  height: 46px;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: pl-spin 0.7s linear infinite;
+}
+@keyframes pl-spin { to { transform: rotate(360deg); } }
+.processing p { font-size: 0.84rem; }
+.progress-bar-wrap { width: 220px; height: 5px; background: rgba(255, 255, 255, 0.12); border-radius: 5px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--orange)); border-radius: 5px; width: 0%; transition: width 0.25s; }
+
+/* ---------------------------------------------------------------- */
+/* Results Meta (Source: .res-wrap, .res-meta)                      */
+/* ---------------------------------------------------------------- */
+
+.results-wrap { padding: 8px 12px; }
+.results-meta {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.68rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 2px 8px;
+}
+/* Wider-viewport variant (Source: .results-header in pharma_search.html) */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- */
+/* Entity Card (Source: .dc, .dc-urg, .dc-head, .dname, .bdg,       */
+/* .bdg-deal/buy/sell in PharmaLink.html - generalized so any       */
+/* screen's list items, not just drug results, use the same card)   */
+/* ---------------------------------------------------------------- */
+
+.entity-card {
+  background: var(--card);
+  border-radius: 17px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.28);
+  animation: pl-card-up 0.18s ease both;
+}
+@keyframes pl-card-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.entity-card__urgent-strip {
+  background: linear-gradient(90deg, #B71C1C, var(--red));
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.entity-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px 7px;
+}
+.entity-card__title { flex: 1; font-size: 1.02rem; font-weight: 900; color: var(--navy); }
+
+.badge { font-size: 0.63rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.badge--deal { background: #FFF3E0; color: #BF360C; }
+.badge--buy  { background: #E3F2FD; color: #0D47A1; }
+.badge--sell { background: #E8F5E9; color: #1B5E20; }
+
+/* ---------------------------------------------------------------- */
+/* Entity Card Section (Source: .ds, .ds-lbl, .no-sell)             */
+/* ---------------------------------------------------------------- */
+
+.entity-card__section { padding: 8px 14px; border-top: 1px solid #EEF0F6; }
+.entity-card__section-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.entity-card__empty-notice {
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  color: #E65100;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------- */
+/* Row (Source: .pr, .pn, .pinfo, .pp, .pm, .ptag, .pico -          */
+/* generalized "contact/list row", not just phone numbers)          */
+/* ---------------------------------------------------------------- */
+
+.entity-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F8FAFC;
+  border: 1.5px solid #ECF0F8;
+  border-radius: 11px;
+  padding: 8px 11px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.entity-row:active,
+.entity-row:active .entity-row__title,
+.entity-row:active .entity-row__price,
+.entity-row:active .entity-row__meta {
+  background: var(--navy);
+  color: var(--gold);
+  border-color: var(--navy);
+}
+.entity-row--highlight { border-color: var(--green); border-width: 2px; }
+
+.entity-row__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--navy);
+  direction: ltr;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.12s;
+}
+.entity-row__info { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.entity-row__price { font-size: 0.79rem; font-weight: 900; color: var(--green); transition: color 0.12s; }
+.entity-row__meta { font-size: 0.59rem; color: #bbb; transition: color 0.12s; }
+.entity-row__tag { font-size: 0.57rem; font-weight: 800; background: #E8F5E9; color: #1B5E20; padding: 1px 6px; border-radius: 6px; flex-shrink: 0; }
+.entity-row__icon { color: #ccc; font-size: 0.75rem; flex-shrink: 0; }
+
+/* Chip variant for grid layouts (Source: .phone-chip in pharma_search.html) */
+.entity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 2px 0;
+  cursor: pointer;
+  transition: all 0.15s;
+  direction: ltr;
+}
+.entity-chip:hover { background: var(--navy); color: var(--gold); }
+.entity-chip--highlight { border-color: var(--green); }
+
+/* ---------------------------------------------------------------- */
+/* Price Row (Source: .price-row, .pmain, .pnote, .ptag2)           */
+/* ---------------------------------------------------------------- */
+
+.price-row {
+  padding: 9px 14px;
+  border-top: 1px solid #EEF0F6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.price-row__main { font-size: 1.22rem; font-weight: 900; color: var(--green); }
+.price-row__note { font-size: 0.63rem; color: #aaa; margin-top: 2px; }
+.price-row__badge {
+  background: linear-gradient(135deg, var(--green), #004D40);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- */
+/* Action Row & Footer Tag (Source: .act, .atip, .btn-call, .gtag)  */
+/* ---------------------------------------------------------------- */
+
+.entity-card__action {
+  padding: 9px 14px 12px;
+  border-top: 1px solid #EEF0F6;
+  background: #FAFBFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.entity-card__action-tip { font-size: 0.71rem; color: #444; line-height: 1.6; flex: 1; }
+
+.btn-call {
+  background: linear-gradient(135deg, #1A3B9E, #0D1B4E);
+  color: var(--gold);
+  border: none;
+  padding: 10px 14px;
+  border-radius: 11px;
+  font-family: var(--font-family-base);
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+.btn-call:active { transform: scale(0.93); }
+
+.entity-card__footer-tag { font-size: 0.6rem; color: #ccc; padding: 5px 14px 8px; border-top: 1px solid #EEF0F6; }
+
+/* ---------------------------------------------------------------- */
+/* Wider-viewport 3-column card body (Source: .card-body, .card-col,*/
+/* .col-label in pharma_search.html) - progressive enhancement only,*/
+/* the stacked .entity-card sections above remain the mobile truth  */
+/* ---------------------------------------------------------------- */
+
+@media (min-width: 700px) {
+  .entity-card--grid .entity-card__body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .entity-card--grid .entity-card__section {
+    border-top: none;
+    border-left: 1px solid var(--border);
+  }
+  .entity-card--grid .entity-card__section:last-child { border-left: none; }
+}
+
+/* ---------------------------------------------------------------- */
+/* No Results (Source: .nores, .nores-icon)                         */
+/* ---------------------------------------------------------------- */
+
+.empty-state { text-align: center; padding: 60px 20px; color: rgba(255, 255, 255, 0.3); }
+.empty-state .empty-state__icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* ---------------------------------------------------------------- */
+/* Buttons - general purpose (gold = primary action, navy = call/   */
+/* confirm action, matching .btn-up / .btn-call usage split)        */
+/* ---------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  border-radius: 11px;
+  font-family: var(--font-family-base);
+  font-weight: 900;
+  cursor: pointer;
+  min-height: 40px;
+  padding: 9px 15px;
+  transition: transform 0.1s;
+}
+.btn:active { transform: scale(0.94); }
+.btn--gold { background: var(--gold); color: var(--navy); box-shadow: 0 3px 12px rgba(255, 214, 0, 0.35); }
+.btn--navy { background: linear-gradient(135deg, #1A3B9E, #0D1B4E); color: var(--gold); }
+.btn--danger { background: var(--red); color: #fff; }
+.btn--outline { background: none; border: 1.5px solid rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.5); }
+
+/* ---------------------------------------------------------------- */
+/* Toast (Source: #toast in PharmaLink.html)                        */
+/* ---------------------------------------------------------------- */
+
+.toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0) + 18px);
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #0a1640;
+  color: var(--gold);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  z-index: 999;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+  transition: transform 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+  border: 1px solid rgba(255, 214, 0, 0.25);
+}
+.toast.on { transform: translateX(-50%) translateY(0); }
+
+/* ---------------------------------------------------------------- */
+/* Banners - install / offline (Source: #install in PharmaLink.html;*/
+/* offline banner reuses the same structural pattern with a warning */
+/* palette since no offline-specific banner exists in the reference)*/
+/* ---------------------------------------------------------------- */
+
+.banner {
+  display: none;
+  padding: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.banner.on { display: flex; }
+.banner p { color: #fff; font-size: 0.75rem; font-weight: 600; flex: 1; margin: 0; }
+.banner button {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-family: var(--font-family-base);
+  font-weight: 900;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.banner--install { background: linear-gradient(135deg, #1B5E20, #2E7D32); }
+.banner--offline { background: linear-gradient(135deg, var(--orange), #E65100); }
+
+/* ---------------------------------------------------------------- */
+/* RTL / LTR                                                         */
+/* dir is set on <html> by nav.js per active language. Reference is */
+/* RTL-first (ar); phone/price numerals stay LTR via direction:ltr  */
+/* on the specific elements above (.entity-row__title, .entity-chip)*/
+/* ---------------------------------------------------------------- */
+
+[dir='rtl'] body { text-align: right; }
+[dir='ltr'] body { text-align: left; }

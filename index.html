@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PharmaLink" />
+  <meta name="theme-color" content="#0D1B4E" />
+  <title>PharmaLink OS</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./assets/icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png" />
+  <link rel="stylesheet" href="./src/ui/styles.css" />
+</head>
+<body>
+  <div id="hdr">
+    <div id="install-banner" class="banner banner--install">
+      <p>📲 ثبّت PharmaLink OS على شاشتك للوصول السريع</p>
+      <button id="install-btn" type="button">تثبيت</button>
+    </div>
+
+    <div class="h-top">
+      <div class="logo-box">
+        <div class="logo-icon">💊</div>
+        <div class="logo-name">PharmaLink OS<span>نظام إدارة وساطة الأدوية</span></div>
+      </div>
+      <div id="header-action-mount"></div>
+    </div>
+
+    <nav id="nav-mount" aria-label="Primary"></nav>
+  </div>
+
+  <main id="content-mount" aria-live="polite"></main>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { installGlobalErrorHandlers } from './src/shared/errorHandler.js';
+    import { logger } from './src/shared/logger.js';
+    import { APP_NAME, APP_VERSION } from './src/shared/constants.js';
+    import { getDatabase } from './src/db/connection.js';
+    import { initNav } from './src/ui/nav.js';
+    import { initLiveWhatsApp } from './src/live/liveWhatsApp.js';
+
+    document.title = APP_NAME;
+
+    let deferredInstallPrompt = null;
+
+    function wireInstallBanner() {
+      const banner = document.getElementById('install-banner');
+      const button = document.getElementById('install-btn');
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        banner.classList.add('on');
+      });
+
+      button.addEventListener('click', () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(() => {
+          deferredInstallPrompt = null;
+          banner.classList.remove('on');
+        });
+      });
+    }
+
+    async function bootstrap() {
+      installGlobalErrorHandlers();
+      logger.info('bootstrap', `${APP_NAME} v${APP_VERSION} starting.`);
+      wireInstallBanner();
+
+      try {
+        await getDatabase();
+      } catch (err) {
+        logger.error('bootstrap', `Database initialization failed: ${err.message}`, err);
+      }
+
+      initLiveWhatsApp();
+
+      initNav({
+        headerEl: document.getElementById('hdr'),
+        navEl: document.getElementById('nav-mount'),
+        contentEl: document.getElementById('content-mount'),
+        toastEl: document.getElementById('toast'),
+      });
+
+      if ('serviceWorker' in navigator) {
+        try {
+          await navigator.serviceWorker.register('./service-worker.js');
+          logger.info('bootstrap', 'Service worker registered.');
+        } catch (err) {
+          logger.warn('bootstrap', `Service worker registration failed: ${err.message}`);
+        }
+      }
+    }
+
+    bootstrap();
+  </script>
+</body>
+</html>
